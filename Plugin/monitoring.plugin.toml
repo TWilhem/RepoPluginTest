@@ -1,4 +1,4 @@
 name = "Monitoring système"
-description = "Vue d'ensemble CPU/RAM/réseau"
+description = "Vue CPU/RAM/réseau"
 command = "btop"
 args = []

@@ -1,0 +1,34 @@
+name: Synchro vers dépôt B
+
+on:
+  push:
+    branches:
+      - main            # branche surveillée dans le dépôt A
+  workflow_dispatch:     # permet aussi de lancer à la main depuis l'onglet Actions
+
+# Évite que deux synchros se chevauchent
+concurrency:
+  group: mirror-to-depot-b
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read     # le GITHUB_TOKEN n'a besoin que de lire le dépôt A
+
+    steps:
+      - name: Récupérer le code du dépôt A
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # historique complet
+          persist-credentials: false  # IMPORTANT : évite que le GITHUB_TOKEN interfère avec le PAT
+
+      - name: Pousser vers la branche mirror du dépôt B
+        env:
+          MIRROR_PAT: ${{ secrets.MIRROR_PAT }}
+          TARGET_REPO: TWilhem/Replica_PluginTest
+          TARGET_BRANCH: mirror
+        run: |
+          git remote add mirror "https://x-access-token:${MIRROR_PAT}@github.com/${TARGET_REPO}.git"
+          git push mirror "HEAD:refs/heads/${TARGET_BRANCH}" --force
